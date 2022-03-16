@@ -8,9 +8,9 @@ type Validator[T any] interface {
 	Validate(t T) bool
 }
 
-type ValidatorFunc[T any] func(t T) bool
+type validatorFunc[T any] func(t T) bool
 
-func (vf ValidatorFunc[T]) Validate(t T) bool {
+func (vf validatorFunc[T]) Validate(t T) bool {
 	return vf(t)
 }
 
@@ -28,11 +28,19 @@ func RegisterValidator[T any](validator Validator[T]) error {
 	return nil
 }
 
+func RegisterValidatorFunc[T any](validator func(t T) bool) error {
+	return RegisterValidator[T](validatorFunc[T](validator))
+}
+
 func MustRegisterValidator[T any](validator Validator[T]) {
 	err := RegisterValidator(validator)
 	if err != nil {
 		panic(err)
 	}
+}
+
+func MustRegisterValidatorFunc[T any](validator func(t T) bool) {
+	MustRegisterValidator[T](validatorFunc[T](validator))
 }
 
 func Validate[T any](t T) bool {

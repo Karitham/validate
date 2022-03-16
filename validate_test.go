@@ -13,13 +13,11 @@ func TestValidate(t *testing.T) {
 		}
 	}()
 
-	validator := ValidatorFunc[string](func(s string) bool {
-		return s == ""
-	})
-
 	validators = make(map[any]any)
 
-	MustRegisterValidator[string](validator)
+	MustRegisterValidatorFunc(func(s string) bool {
+		return s == ""
+	})
 
 	type test struct {
 		input string
