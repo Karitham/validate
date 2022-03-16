@@ -17,7 +17,7 @@ type Book struct {
 
 
 func main() {
-    validate.MustRegisterValidatorFunc[ISBN](func (isbn ISBN)) bool {
+    validate.MustRegisterValidatorFunc[ISBN](func (isbn ISBN) bool {
         // For brevity, lets just implement one ISBN rule
         // It must be length of 10 or 13 
         return len(isbn) == 10 || len(isbn) == 13
