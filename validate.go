@@ -5,12 +5,12 @@ import (
 )
 
 type Validator[T any] interface {
-	Validate(t T) bool
+	Validate(t T) error
 }
 
-type validatorFunc[T any] func(t T) bool
+type validatorFunc[T any] func(t T) error
 
-func (vf validatorFunc[T]) Validate(t T) bool {
+func (vf validatorFunc[T]) Validate(t T) error {
 	return vf(t)
 }
 
@@ -28,7 +28,7 @@ func RegisterValidator[T any](validator Validator[T]) error {
 	return nil
 }
 
-func RegisterValidatorFunc[T any](validator func(t T) bool) error {
+func RegisterValidatorFunc[T any](validator validatorFunc[T]) error {
 	return RegisterValidator[T](validatorFunc[T](validator))
 }
 
@@ -39,11 +39,11 @@ func MustRegisterValidator[T any](validator Validator[T]) {
 	}
 }
 
-func MustRegisterValidatorFunc[T any](validator func(t T) bool) {
+func MustRegisterValidatorFunc[T any](validator validatorFunc[T]) {
 	MustRegisterValidator[T](validatorFunc[T](validator))
 }
 
-func Validate[T any](t T) bool {
+func Validate[T any](t T) error {
 	var _t T
 
 	found, ok := validators[_t]
@@ -54,7 +54,7 @@ func Validate[T any](t T) bool {
 	validator, ok := found.(Validator[T])
 
 	if !ok {
-		panic(fmt.Errorf("validator registered for type %T is not a validator of %T", _t, _t))
+		return fmt.Errorf("validator registered for type %T is not a validator of %T", _t, _t)
 	}
 
 	return validator.Validate(t)

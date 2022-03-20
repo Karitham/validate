@@ -2,8 +2,10 @@ package validate
 
 import (
 	"errors"
-	"reflect"
+	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestValidate(t *testing.T) {
@@ -14,26 +16,28 @@ func TestValidate(t *testing.T) {
 	}()
 
 	validators = make(map[any]any)
+	err := fmt.Errorf("expected a valid string, but got empty one")
 
-	MustRegisterValidatorFunc(func(s string) bool {
-		return s == ""
+	MustRegisterValidatorFunc(func(s string) error {
+		if s != "" {
+			return err
+		}
+		return nil
 	})
 
 	type test struct {
 		input string
-		want  bool
+		err   error
 	}
 
 	tests := []test{
-		{input: "", want: true},
-		{input: "test", want: false},
+		{input: "", err: nil},
+		{input: "test", err: err},
 	}
 
 	for _, tc := range tests {
 		got := Validate(tc.input)
-		if !reflect.DeepEqual(tc.want, got) {
-			t.Fatalf("expected: %v, got: %v", tc.want, got)
-		}
+		assert.Equal(t, got, tc.err)
 	}
 }
 
